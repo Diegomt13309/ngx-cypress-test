@@ -246,7 +246,7 @@ describe('Our First Suite', () => {
 
     })
 
-    it.only('Web tables', () => {
+    it('Web tables', () => {
         cy.visit('/')
         cy.contains('Tables & Data').click()
         cy.contains('Smart Table').click()
@@ -283,15 +283,47 @@ describe('Our First Suite', () => {
                     cy.wrap(trowd).find('td').eq(6).should('contain', age)
                 }
             })
-
-
         })
-
-
-
-
     })
 
+    it.only('Date Picker enhance', () => {
+        cy.visit('/')
+        cy.contains('Forms').click()
+        cy.contains('Datepicker').click()
+        cy.contains('nb-card', 'Common Datepicker').find('input').click()
+
+
+
+        function clickOnDate(day) {
+            let date = new Date()
+            date.setDate(date.getDate() + day)
+            cy.log(date.getDate())
+            let futureDay = date.getDate()
+            let futureMonth = date.toLocaleString('defautl', { month: 'short' })
+            let dateAssert = futureMonth + ' ' + futureDay + ', ' + date.getFullYear()
+
+            cy.get('nb-calendar-navigation').invoke('attr', 'ng-reflect-date').then(dateAttribute => {
+                if (!dateAttribute.includes(futureMonth)) {
+                    cy.get('[data-name="chevron-right"]').click()
+                    clickOnDate(day)
+                } else {
+                    cy.get('nb-calendar-day-picker [class="day-cell ng-star-inserted"]').contains(futureDay).click()
+                }
+            })
+            return dateAssert
+        }
+
+
+
+
+        cy.contains('nb-card', 'Common Datepicker').find('input').then(input => {
+            cy.wrap(input).click()
+            let dateAssert = clickOnDate(300)
+            cy.wrap(input).invoke('prop', 'value')
+                .should('contain', dateAssert)
+
+        })
+    })
 })
 
 
